@@ -17,7 +17,7 @@ Primitive Recursion (The Sovereign State of Order): This represents total functi
 2.2 Principle 2: Sovereign Identity via Fixed-Point Theorem
 Mathematical Foundation (Kleene's Recursion Theorem): A program can be constructed to have access to its own description, creating a stable point of self-reference (φ(e) = φ(f(e))).
 
-System Implementation (UUID Anchoring): Every entity, process, and law within The Explorer is assigned a deterministic UUIDv5. This UUID is generated from the SHA-256 hash of the entity's own canonically serialized state. This creates an immutable, verifiable identity, ensuring that any change to an entity's state is cryptographically auditable. This process is the bedrock of trust and continuity across both phases.
+System Implementation (Sovereign Hash Anchoring): Every entity, process, and law within The Explorer is assigned a sovereign hash-based identifier. This identifier is generated from the SHA-256 hash of the entity's own canonically serialized state. This creates an immutable, verifiable identity, ensuring that any change to an entity's state is cryptographically auditable. This process is the bedrock of trust and continuity across both phases.
 
 2.3 Principle 3: System Health via Violation Pressure
 Mathematical Foundation: The system's stability is quantified by a master metric, Violation Pressure (VP).

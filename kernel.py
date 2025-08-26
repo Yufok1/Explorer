@@ -8,7 +8,7 @@ class Kernel:
         self.kernel_dir = os.path.abspath(kernel_dir)
         self.versions_dir = os.path.join(self.kernel_dir, 'versions')
         self.latest_link = os.path.join(self.kernel_dir, link_name)
-        self.function_uuids = []
+        self.sovereign_ids = []
         self.version_file = None
         self._load_state()
 
@@ -20,33 +20,33 @@ class Kernel:
             self.version_file = version_path
             if os.path.exists(version_path):
                 with open(version_path, 'r') as f:
-                    self.function_uuids = json.load(f)
+                    self.sovereign_ids = json.load(f)
         else:
-            self.function_uuids = []
+            self.sovereign_ids = []
             self.version_file = None
 
-    def amend(self, new_uuid):
+    def amend(self, new_sovereign_id):
         """
-        Add a new certified function UUID to the kernel and create a new version.
+        Add a new certified function sovereign ID to the kernel and create a new version.
         Atomically update latest.link to point to the new version file.
         """
-        # Only add if UUID is not already present (deduplication)
-        if new_uuid not in self.function_uuids:
-            self.function_uuids.append(new_uuid)
+        # Only add if sovereign ID is not already present (deduplication)
+        if new_sovereign_id not in self.sovereign_ids:
+            self.sovereign_ids.append(new_sovereign_id)
             timestamp = time.strftime('%Y%m%d_%H%M%S')
             version_filename = f'kernel_{timestamp}.json'
             version_path = os.path.join(self.versions_dir, version_filename)
             with open(version_path, 'w') as f:
-                json.dump(self.function_uuids, f)
+                json.dump(self.sovereign_ids, f)
             # Atomically update latest.link as a text file
             tmp_link = self.latest_link + '.tmp'
             with open(tmp_link, 'w') as f:
                 f.write(version_filename)
             os.replace(tmp_link, self.latest_link)
             self.version_file = version_path
-            return True  # UUID was added
+            return True  # Sovereign ID was added
         else:
-            return False  # UUID already exists
+            return False  # Sovereign ID already exists
 
     def rollback(self):
         """
@@ -65,17 +65,17 @@ class Kernel:
         os.replace(tmp_link, self.latest_link)
         self.version_file = prev_path
         with open(prev_path, 'r') as f:
-            self.function_uuids = json.load(f)
+            self.sovereign_ids = json.load(f)
         return True
 
-    def get_function_uuids(self):
-        return list(self.function_uuids)
+    def get_sovereign_ids(self):
+        return list(self.sovereign_ids)
 
 # Example usage:
 if __name__ == "__main__":
     kernel = Kernel()
-    print("Current UUIDs:", kernel.get_function_uuids())
-    kernel.amend("123e4567-e89b-12d3-a456-426614174000")
-    print("After amendment:", kernel.get_function_uuids())
+    print("Current Sovereign IDs:", kernel.get_sovereign_ids())
+    kernel.amend("hash-1234567890abcdef")
+    print("After amendment:", kernel.get_sovereign_ids())
     kernel.rollback()
-    print("After rollback:", kernel.get_function_uuids())
+    print("After rollback:", kernel.get_sovereign_ids())

@@ -21,7 +21,7 @@ class MirrorOfInsight:
             'timestamp': time.time(),
             'phase': system_state.get('phase', 'unknown'),
             'breath_state': system_state.get('breath_state', {}),
-            'kernel_uuids': system_state.get('kernel_uuids', []),
+            'kernel_sovereign_ids': system_state.get('kernel_sovereign_ids', []),
             'patterns': self._analyze_patterns(system_state),
             'stability_assessment': self._assess_stability(system_state),
             'growth_indicators': self._assess_growth(system_state)
@@ -43,7 +43,7 @@ class MirrorOfInsight:
         """Analyze patterns in system behavior"""
         patterns = {
             'breath_rhythm': 'stable' if state.get('breath_state', {}).get('cycle_count', 0) > 0 else 'forming',
-            'function_growth': len(state.get('kernel_uuids', [])),
+            'function_growth': len(state.get('kernel_sovereign_ids', [])),
             'phase_consistency': 'consistent' if state.get('phase') in ['genesis', 'sovereign'] else 'unstable'
         }
         return patterns
@@ -58,7 +58,7 @@ class MirrorOfInsight:
             stability_score += 0.4
             
         # Function stability
-        if len(state.get('kernel_uuids', [])) > 0:
+        if len(state.get('kernel_sovereign_ids', [])) > 0:
             stability_score += 0.3
             
         # Phase stability
@@ -73,7 +73,7 @@ class MirrorOfInsight:
     def _assess_growth(self, state):
         """Assess system growth indicators"""
         growth = {
-            'function_count': len(state.get('kernel_uuids', [])),
+            'function_count': len(state.get('kernel_sovereign_ids', [])),
             'breath_cycles': state.get('breath_state', {}).get('cycle_count', 0),
             'phase_progression': 'advancing' if state.get('phase') == 'sovereign' else 'developing'
         }
@@ -154,7 +154,7 @@ class MirrorOfPortent:
                 'message': 'System stability below threshold - intervention may be needed'
             })
             
-        if len(state.get('kernel_uuids', [])) == 0:
+        if len(state.get('kernel_sovereign_ids', [])) == 0:
             warnings.append({
                 'type': 'function_warning',
                 'severity': 'medium',

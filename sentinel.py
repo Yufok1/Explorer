@@ -60,6 +60,8 @@ class Sentinel:
             except Exception as e:
                 exec_time = time.time() - start
                 mem_usage_mb = 0.0
+                resource_exceeded = False
+                timed_out = False
                 print(f"[Warning] Exception during execution: {e}")
             finally:
                 # Chamber handles process cleanup
@@ -201,15 +203,15 @@ class Sentinel:
             color_print(f"[Result] VP={vp}, Violation detected={violation_detected} (threshold={self.vp_threshold}) ✅ Stable and lawful operation.", Colors.GREEN)
         return violation_detected, vp
 
-    def handle_violation(self, offending_uuid):
+    def handle_violation(self, offending_sovereign_id):
         """
-        Eject offending function UUID and trigger kernel rollback.
+        Eject offending function sovereign ID and trigger kernel rollback.
         """
-        uuids = self.kernel.get_function_uuids()
-        if offending_uuid in uuids:
-            uuids.remove(offending_uuid)
-            # Amend kernel without offending UUID
-            self.kernel.function_uuids = uuids
+        sovereign_ids = self.kernel.get_sovereign_ids()
+        if offending_sovereign_id in sovereign_ids:
+            sovereign_ids.remove(offending_sovereign_id)
+            # Amend kernel without offending sovereign ID
+            self.kernel.sovereign_ids = sovereign_ids
             self.kernel.amend('')  # Empty string to force new version
         self.kernel.rollback()
 

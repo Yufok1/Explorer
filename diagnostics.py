@@ -24,6 +24,34 @@ class Diagnostics:
             self.save_checkpoint(label, state)
             self.last_time_checkpoint = now
 
+    def load_latest_state(self):
+        """Load the most recent system state from checkpoints"""
+        try:
+            # Find the most recent checkpoint
+            checkpoints = []
+            for filename in os.listdir(self.checkpoint_dir):
+                if filename.endswith('.json'):
+                    filepath = os.path.join(self.checkpoint_dir, filename)
+                    checkpoints.append((filepath, os.path.getmtime(filepath)))
+            
+            if not checkpoints:
+                print('[Diagnostics] No previous state found, starting fresh')
+                return None
+            
+            # Sort by modification time (newest first)
+            checkpoints.sort(key=lambda x: x[1], reverse=True)
+            latest_checkpoint = checkpoints[0][0]
+            
+            with open(latest_checkpoint, 'r') as f:
+                state = json.load(f)
+            
+            print(f'[Diagnostics] Loaded previous state from: {latest_checkpoint}')
+            return state
+            
+        except Exception as e:
+            print(f'[Diagnostics] Error loading previous state: {e}')
+            return None
+
     def report(self, state):
         print('[Diagnostics] Comprehensive System Report:')
         print(json.dumps(state, indent=2))

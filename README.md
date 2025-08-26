@@ -35,7 +35,7 @@ Explorer is an open-source Python system for agentic, modular, and lawful govern
 4. **Lawful Kernel** (`kernel.py`):  
    * Maintains system order, versioning, and rollback.  
    * Ensures only certified modules are active.
-   * Prevents duplicate UUID entries.
+   * Prevents duplicate sovereign ID entries.
 
 5. **Sentinel and Diagnostics** (`sentinel.py`, `diagnostics.py`):  
    * Monitors module health and certification status.  
@@ -43,8 +43,9 @@ Explorer is an open-source Python system for agentic, modular, and lawful govern
    * Implements mathematical capability assessment for phase transitions.
 
 6. **Identity System** (`identity.py`):
-   * Generates deterministic UUIDs based on performance characteristics.
-   * Ensures unique identification of modules based on their traits.
+   * Generates sovereign hash-based identifiers based on performance characteristics.
+   * Ensures identity = definition for perfect integrity.
+   * No separation between entity and its sovereign definition.
 
 7. **Breath Engine** (`breath_engine.py`):
    * Implements natural breathing patterns for system timing.
@@ -82,7 +83,7 @@ Explorer is an open-source Python system for agentic, modular, and lawful govern
 
 - **Mathematical Capability Assessment**: System transitions between phases based on mathematical understanding rather than fixed thresholds.
 - **Dynamic Stability Center**: Learns from actual performance to set realistic, achievable ideals.
-- **Trait-Based UUID Generation**: Creates unique identifiers based on performance characteristics.
+- **Sovereign Hash-Based Identifiers**: Identity = definition for perfect integrity.
 - **Breath Integration**: Natural timing patterns for system operation.
 - **Bloom System**: Natural unfolding patterns with controlled growth using logarithmic scaling.
 - **Enhanced VP Calculation**: Measures deviations from achievable ideals rather than impossible standards.
@@ -103,7 +104,7 @@ Explorer is an open-source Python system for agentic, modular, and lawful govern
 ## File Structure
 
 * `main.py` — Enhanced Controller with biphasic operation
-* `identity.py` — Deterministic UUID generation
+* `identity.py` — Sovereign hash-based identifier generation
 * `sandbox.py` — Process isolation
 * `metrics.py` — Enhanced telemetry and VP calculation
 * `kernel.py` — Lawful Kernel with duplicate prevention
@@ -114,7 +115,7 @@ Explorer is an open-source Python system for agentic, modular, and lawful govern
 * `dynamic_operations.py` — Intelligent operation generation
 * `test_func1.py` to `test_func5.py` — Example modules
 * `data/checkpoints/` — Diagnostics
-* `data/kernel/` — Kernel versioning and UUID storage
+* `data/kernel/` — Kernel versioning and sovereign ID storage
 
 ## Usage Notes
 
@@ -124,6 +125,7 @@ Explorer is an open-source Python system for agentic, modular, and lawful govern
 * Diagnostics are saved for audit and review.
 * System operates in two phases: Genesis (chaos) and Sovereign (order).
 * Mathematical capability assessment determines phase transitions.
+* Sovereign hash-based identifiers ensure perfect integrity.
 
 ## Contribution
 
@@ -136,4 +138,4 @@ Explorer is an open-source Python system for agentic, modular, and lawful govern
 
 ## About
 
-Explorer is an open-source Python system for agentic, modular, and lawful governance of code modules with enhanced mathematical capability assessment and dynamic stability systems.
+Explorer is an open-source Python system for agentic, modular, and lawful governance of code modules with enhanced mathematical capability assessment, dynamic stability systems, and sovereign hash-based identifiers ensuring perfect integrity.

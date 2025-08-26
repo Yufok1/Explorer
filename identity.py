@@ -1,27 +1,31 @@
-import uuid
 import hashlib
 import json
 
-NAMESPACE_UUID = uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')  # DNS namespace, can be replaced
+def sovereign_hash_id(traits, namespace="explorer"):
+    """
+    Generate sovereign identifier where identity = definition.
+    The hash IS the identity - no separation between entity and its definition possible.
+    """
+    # Include namespace in the sovereign definition
+    sovereign_definition = {
+        "namespace": namespace,
+        "traits": traits
+    }
+    
+    # Serialize the complete sovereign definition
+    serialized = json.dumps(sovereign_definition, sort_keys=True)
+    
+    # The hash IS the identity - perfect integrity guaranteed
+    return hashlib.sha256(serialized.encode()).hexdigest()[:16]
 
 def canonical_serialize(entity_state: dict) -> str:
     """
     Canonically serialize an entity's state to a JSON string with sorted keys.
+    Maintained for backward compatibility.
     """
     return json.dumps(entity_state, sort_keys=True, separators=(",", ":"))
-
-
-def deterministic_uuid_v5(entity_state: dict) -> str:
-    """
-    Generate a deterministic UUIDv5 from the SHA-256 hash of the entity's canonical serialized state.
-    """
-    serialized = canonical_serialize(entity_state)
-    sha256_hash = hashlib.sha256(serialized.encode('utf-8')).hexdigest()
-    # Use the first 32 characters of the SHA-256 hash as the 'name' for UUIDv5
-    uuid_v5 = uuid.uuid5(NAMESPACE_UUID, sha256_hash[:32])
-    return str(uuid_v5)
 
 # Example usage:
 if __name__ == "__main__":
     example_entity = {"type": "function", "code": "def f(x): return x+1", "version": 1}
-    print("UUIDv5:", deterministic_uuid_v5(example_entity))
+    print("Sovereign Hash ID:", sovereign_hash_id(example_entity))

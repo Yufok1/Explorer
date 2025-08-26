@@ -79,7 +79,7 @@ class BiphasicController:
         })
         return triggers
     def __init__(self):
-        self.phase = 'genesis'
+        # Initialize systems
         self.kernel = Kernel()
         self.sentinel = Sentinel()
         self.diagnostics = Diagnostics()
@@ -99,6 +99,9 @@ class BiphasicController:
         self.performance_history = []
         self.stability_center = self._initialize_stability_center()
         self.stability_envelope = self._initialize_stability_envelope()
+        
+        # Load previous state or start fresh
+        self.phase = self._load_previous_state()
 
     def _initialize_stability_center(self):
         """Initialize stability center with realistic baseline values"""
@@ -115,6 +118,35 @@ class BiphasicController:
             'memory_mb': (1.0, 500.0),     # 1MB to 500MB
             'reliability': (1.0, 1.0)      # Must be reliable
         }
+
+    def _load_previous_state(self):
+        """Load previous system state and determine starting phase"""
+        previous_state = self.diagnostics.load_latest_state()
+        
+        if previous_state is None:
+            print("[Controller] No previous state found, starting in Genesis Phase")
+            return 'genesis'
+        
+        # Extract phase from previous state
+        previous_phase = previous_state.get('phase', 'genesis')
+        
+        # Check if we should continue in Sovereign Phase
+        if previous_phase == 'sovereign':
+            print(f"[Controller] Resuming in Sovereign Phase from previous session")
+            return 'sovereign'
+        elif previous_phase == 'genesis':
+            # Check if we have enough certified functions to transition
+            kernel_ids = previous_state.get('kernel_sovereign_ids', [])
+            if len(kernel_ids) > 0:
+                print(f"[Controller] Previous Genesis Phase had {len(kernel_ids)} certified functions, checking mathematical capability...")
+                # We'll let the system check mathematical capability in the first run
+                return 'genesis'
+            else:
+                print("[Controller] Previous Genesis Phase had no certified functions, starting fresh")
+                return 'genesis'
+        else:
+            print(f"[Controller] Unknown previous phase '{previous_phase}', starting in Genesis Phase")
+            return 'genesis'
 
     def _update_stability_from_performance(self, traits):
         """Update stability center based on actual performance"""
@@ -158,7 +190,7 @@ class BiphasicController:
         breath_state = self.breath_engine.get_breath_state()
         base_state = {
             'phase': self.phase,
-            'kernel_uuids': self.kernel.get_function_uuids(),
+            'kernel_sovereign_ids': self.kernel.get_sovereign_ids(),
             'breath_state': breath_state,
         }
         
@@ -226,21 +258,21 @@ class BiphasicController:
                     color_print(f"[Stability] Updated ideals - Speed: {self.stability_center['speed_ms']:.1f}ms, Memory: {self.stability_center['memory_mb']:.1f}MB", Colors.CYAN)
             print(f"Function {func['func_path']} certified: {certified}, VP values: {vp_values}")
             if certified:
-                # Generate trait-based UUID using identity system
-                from identity import deterministic_uuid_v5
+                # Generate sovereign hash-based identifier
+                from identity import sovereign_hash_id
                 traits = {'func_path': func['func_path'], 'vp_values': vp_values}
-                uuid = f"uuid-{deterministic_uuid_v5(traits)[:8]}"
-                added = self.kernel.amend(uuid)
+                sovereign_id = f"hash-{sovereign_hash_id(traits)}"
+                added = self.kernel.amend(sovereign_id)
                 if added:
-                    color_print(f"[Kernel] Added new UUID: {uuid}", Colors.GREEN)
+                    color_print(f"[Kernel] Added new sovereign ID: {sovereign_id}", Colors.GREEN)
                 else:
-                    color_print(f"[Kernel] UUID already exists: {uuid}", Colors.YELLOW)
+                    color_print(f"[Kernel] Sovereign ID already exists: {sovereign_id}", Colors.YELLOW)
                 self.diagnostics.save_checkpoint('certification', self.get_state())
             self.diagnostics.maybe_time_checkpoint('time', self.get_state())
             
         # Check for mathematical capability and phase transition
-        current_uuids = self.kernel.get_function_uuids()
-        color_print(f"[Genesis] Current UUID count: {len(current_uuids)}", Colors.CYAN)
+        current_sovereign_ids = self.kernel.get_sovereign_ids()
+        color_print(f"[Genesis] Current sovereign ID count: {len(current_sovereign_ids)}", Colors.CYAN)
         color_print(f"[Genesis] Checking mathematical capability for understanding...", Colors.CYAN)
         
         if self.sentinel.check_critical_mass():
@@ -276,7 +308,7 @@ class BiphasicController:
         
         # Display learning statistics
         learning_stats = current_state['learning_stats']
-        color_print(f"[Learning] 🜂 Success patterns: {learning_stats['success_patterns']}, Failures: {learning_stats['failure_patterns']}, Defunct: {learning_stats['defunct_uuids']}", Colors.CYAN)
+        color_print(f"[Learning] 🜂 Success patterns: {learning_stats['success_patterns']}, Failures: {learning_stats['failure_patterns']}, Defunct: {learning_stats['defunct_sovereign_ids']}", Colors.CYAN)
         
         # Check for warnings and opportunities
         for warning in forecast_data['warnings']:
@@ -312,16 +344,16 @@ class BiphasicController:
                     self._update_stability_from_performance(traits)
                     color_print(f"[Stability] Updated ideals - Speed: {self.stability_center['speed_ms']:.1f}ms, Memory: {self.stability_center['memory_mb']:.1f}MB", Colors.CYAN)
             if certified:
-                # Generate trait-based UUID for replacement function
-                from identity import deterministic_uuid_v5
+                # Generate sovereign hash-based identifier for replacement function
+                from identity import sovereign_hash_id
                 traits = {'replacement_type': trig['name'], 'vp_values': vp_values, 'func_path': trig['func_path']}
-                new_uuid = f"uuid-{deterministic_uuid_v5(traits)[:8]}"
-                color_print(f"[Improvement] Certified new function: {new_uuid}", Colors.GREEN)
-                added = self.kernel.amend(new_uuid)
+                new_sovereign_id = f"hash-{sovereign_hash_id(traits)}"
+                color_print(f"[Improvement] Certified new function: {new_sovereign_id}", Colors.GREEN)
+                added = self.kernel.amend(new_sovereign_id)
                 if added:
-                    color_print(f"[Kernel] Added new UUID: {new_uuid}", Colors.GREEN)
+                    color_print(f"[Kernel] Added new sovereign ID: {new_sovereign_id}", Colors.GREEN)
                 else:
-                    color_print(f"[Kernel] UUID already exists: {new_uuid}", Colors.YELLOW)
+                    color_print(f"[Kernel] Sovereign ID already exists: {new_sovereign_id}", Colors.YELLOW)
                 self.diagnostics.save_checkpoint('certification', self.get_state())
             self.diagnostics.maybe_time_checkpoint('time', self.get_state())
         # Generate dynamic operations based on current state and insights
@@ -330,7 +362,7 @@ class BiphasicController:
         color_print(f"[Dynamic Operations] 🜂 Generated {len(operations)} intelligent operations", Colors.CYAN)
         
         for op in operations:
-            if op['uuid'] in self.dynamic_operations.defunct_uuids:
+            if op['sovereign_id'] in self.dynamic_operations.defunct_sovereign_ids:
                 continue
                 
             # Breathe between operations
@@ -356,15 +388,15 @@ class BiphasicController:
             
             # Record operation result for learning
             success = not violation
-            self.dynamic_operations.record_operation_result(op['uuid'], success, vp)
+            self.dynamic_operations.record_operation_result(op['sovereign_id'], success, vp)
             
             if violation:
-                color_print(f"[Dynamic] Operation {op['uuid']} VP: {vp:.3f}, Violation: {violation}", Colors.RED)
-                self.sentinel.handle_violation(op['uuid'])
+                color_print(f"[Dynamic] Operation {op['sovereign_id']} VP: {vp:.3f}, Violation: {violation}", Colors.RED)
+                self.sentinel.handle_violation(op['sovereign_id'])
                 self.diagnostics.save_checkpoint('violation', self.get_state())
                 
                 # Generate replacement operation
-                color_print(f"[Dynamic] 🜂 Generating intelligent replacement for {op['uuid']}...", Colors.YELLOW)
+                color_print(f"[Dynamic] 🜂 Generating intelligent replacement for {op['sovereign_id']}...", Colors.YELLOW)
                 replacement_operations = self.dynamic_operations.generate_operations(current_state, insight_data, forecast_data)
                 
                 if replacement_operations:
@@ -376,19 +408,19 @@ class BiphasicController:
                         stability_envelope=self.stability_envelope
                     )
                     if certified:
-                        # Generate trait-based UUID for dynamic replacement
-                        from identity import deterministic_uuid_v5
-                        traits = {'dynamic_replacement': True, 'original_op': op['uuid'], 'vp_values': vp_values}
-                        new_uuid = f"uuid-{deterministic_uuid_v5(traits)[:8]}"
-                        color_print(f"[Dynamic] 🜂 Certified intelligent replacement: {new_uuid}", Colors.GREEN)
-                        added = self.kernel.amend(new_uuid)
+                        # Generate sovereign hash-based identifier for dynamic replacement
+                        from identity import sovereign_hash_id
+                        traits = {'dynamic_replacement': True, 'original_op': op['sovereign_id'], 'vp_values': vp_values}
+                        new_sovereign_id = f"hash-{sovereign_hash_id(traits)}"
+                        color_print(f"[Dynamic] 🜂 Certified intelligent replacement: {new_sovereign_id}", Colors.GREEN)
+                        added = self.kernel.amend(new_sovereign_id)
                         if added:
-                            color_print(f"[Kernel] Added new UUID: {new_uuid}", Colors.GREEN)
+                            color_print(f"[Kernel] Added new sovereign ID: {new_sovereign_id}", Colors.GREEN)
                         else:
-                            color_print(f"[Kernel] UUID already exists: {new_uuid}", Colors.YELLOW)
+                            color_print(f"[Kernel] Sovereign ID already exists: {new_sovereign_id}", Colors.YELLOW)
                         self.diagnostics.save_checkpoint('certification', self.get_state())
             else:
-                color_print(f"[Dynamic] Operation {op['uuid']} VP: {vp:.3f}, Success", Colors.GREEN)
+                color_print(f"[Dynamic] Operation {op['sovereign_id']} VP: {vp:.3f}, Success", Colors.GREEN)
                 
             self.diagnostics.maybe_time_checkpoint('time', self.get_state())
 

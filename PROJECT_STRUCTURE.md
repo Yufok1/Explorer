@@ -7,7 +7,7 @@
 ```
 Explorer/
 ├── main.py                    # Enhanced biphasic controller
-├── identity.py                # Deterministic UUID generation
+├── identity.py                # Sovereign hash-based identifier generation
 ├── sandbox.py                 # Process isolation and safety
 ├── metrics.py                 # Enhanced telemetry and VP calculation
 ├── kernel.py                  # Lawful kernel with versioning
@@ -45,9 +45,9 @@ Explorer/
 - **Mathematical Capability Assessment**: Determines phase transitions
 
 ### **Identity System (identity.py)**
-- **Deterministic UUIDs**: Based on performance characteristics
+- **Sovereign Hash-Based Identifiers**: Identity = definition for perfect integrity
 - **Trait-Based Identification**: Unique signatures for each performance pattern
-- **Content-Addressable Storage**: UUIDs represent actual function behavior
+- **Content-Addressable Storage**: Sovereign IDs represent actual function behavior
 
 ### **Breath Engine (breath_engine.py)**
 - **Natural Timing**: Rhythmic operation cycles

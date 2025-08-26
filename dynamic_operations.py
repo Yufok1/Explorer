@@ -14,7 +14,7 @@ class DynamicOperations:
     def __init__(self):
         self.operation_history = []
         self.learning_memory = {}
-        self.defunct_uuids = set()
+        self.defunct_sovereign_ids = set()
         self.success_patterns = {}
         self.failure_patterns = {}
         self.operation_templates = self._initialize_templates()
@@ -55,7 +55,7 @@ class DynamicOperations:
         
         # Analyze current state
         stability = insight_data.get('stability_assessment', {}).get('score', 0)
-        function_count = len(current_state.get('kernel_uuids', []))
+        function_count = len(current_state.get('kernel_sovereign_ids', []))
         warnings = forecast_data.get('warnings', [])
         opportunities = forecast_data.get('opportunities', [])
         
@@ -143,7 +143,7 @@ class DynamicOperations:
     def _generate_adaptive_operations(self, count, current_state):
         """Generate adaptive operations based on current state"""
         operations = []
-        function_count = len(current_state.get('kernel_uuids', []))
+        function_count = len(current_state.get('kernel_sovereign_ids', []))
         
         # Choose templates based on current function count
         if function_count == 0:
@@ -174,9 +174,18 @@ class DynamicOperations:
             else:
                 traits[trait] = base_value
                 
+        # Generate sovereign hash-based identifier for dynamic operation
+        from identity import sovereign_hash_id
+        operation_traits = {
+            'operation_id': operation_id,
+            'traits': traits,
+            'generation_time': time.time()
+        }
+        sovereign_id = f"hash-{sovereign_hash_id(operation_traits)}"
+        
         return {
             'traits': traits,
-            'uuid': f"uuid-{operation_id}-{int(time.time() * 1000)}",  # More unique timestamp
+            'sovereign_id': sovereign_id,  # Sovereign hash-based identifier
             'template': template,
             'generation_time': time.time()
         }
@@ -219,7 +228,7 @@ class DynamicOperations:
             
         return operation
     
-    def record_operation_result(self, operation_uuid, success, vp_value):
+    def record_operation_result(self, operation_sovereign_id, success, vp_value):
         """Record the result of an operation for learning"""
         operation_key = self._get_operation_key({'traits': {'execution_time_ms': vp_value * 100, 'memory_kb': vp_value * 1000}})
         
@@ -239,13 +248,13 @@ class DynamicOperations:
                 (self.failure_patterns[operation_key]['avg_vp'] * (self.failure_patterns[operation_key]['count'] - 1) + vp_value) /
                 self.failure_patterns[operation_key]['count']
             )
-            self.defunct_uuids.add(operation_uuid)
+            self.defunct_sovereign_ids.add(operation_sovereign_id)
     
     def get_learning_stats(self):
         """Get learning statistics"""
         return {
             'success_patterns': len(self.success_patterns),
             'failure_patterns': len(self.failure_patterns),
-            'defunct_uuids': len(self.defunct_uuids),
+            'defunct_sovereign_ids': len(self.defunct_sovereign_ids),
             'total_operations': len(self.operation_history)
         }
