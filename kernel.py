@@ -1,0 +1,81 @@
+import os
+import json
+import shutil
+import time
+
+class Kernel:
+    def __init__(self, kernel_dir='data/kernel', link_name='latest.link'):
+        self.kernel_dir = os.path.abspath(kernel_dir)
+        self.versions_dir = os.path.join(self.kernel_dir, 'versions')
+        self.latest_link = os.path.join(self.kernel_dir, link_name)
+        self.function_uuids = []
+        self.version_file = None
+        self._load_state()
+
+    def _load_state(self):
+        if os.path.exists(self.latest_link):
+            with open(self.latest_link, 'r') as f:
+                version_filename = f.read().strip()
+            version_path = os.path.join(self.versions_dir, version_filename)
+            self.version_file = version_path
+            if os.path.exists(version_path):
+                with open(version_path, 'r') as f:
+                    self.function_uuids = json.load(f)
+        else:
+            self.function_uuids = []
+            self.version_file = None
+
+    def amend(self, new_uuid):
+        """
+        Add a new certified function UUID to the kernel and create a new version.
+        Atomically update latest.link to point to the new version file.
+        """
+        # Only add if UUID is not already present (deduplication)
+        if new_uuid not in self.function_uuids:
+            self.function_uuids.append(new_uuid)
+            timestamp = time.strftime('%Y%m%d_%H%M%S')
+            version_filename = f'kernel_{timestamp}.json'
+            version_path = os.path.join(self.versions_dir, version_filename)
+            with open(version_path, 'w') as f:
+                json.dump(self.function_uuids, f)
+            # Atomically update latest.link as a text file
+            tmp_link = self.latest_link + '.tmp'
+            with open(tmp_link, 'w') as f:
+                f.write(version_filename)
+            os.replace(tmp_link, self.latest_link)
+            self.version_file = version_path
+            return True  # UUID was added
+        else:
+            return False  # UUID already exists
+
+    def rollback(self):
+        """
+        Atomically switch latest.link back to the previous kernel version file.
+        """
+        # Find previous version file
+        versions = sorted(os.listdir(self.versions_dir))
+        if len(versions) < 2:
+            return False  # No previous version to roll back to
+        prev_version = versions[-2]
+        prev_path = os.path.join(self.versions_dir, prev_version)
+        # Atomically update latest.link as a text file
+        tmp_link = self.latest_link + '.tmp'
+        with open(tmp_link, 'w') as f:
+            f.write(prev_version)
+        os.replace(tmp_link, self.latest_link)
+        self.version_file = prev_path
+        with open(prev_path, 'r') as f:
+            self.function_uuids = json.load(f)
+        return True
+
+    def get_function_uuids(self):
+        return list(self.function_uuids)
+
+# Example usage:
+if __name__ == "__main__":
+    kernel = Kernel()
+    print("Current UUIDs:", kernel.get_function_uuids())
+    kernel.amend("123e4567-e89b-12d3-a456-426614174000")
+    print("After amendment:", kernel.get_function_uuids())
+    kernel.rollback()
+    print("After rollback:", kernel.get_function_uuids())
